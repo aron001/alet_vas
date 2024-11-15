@@ -10,11 +10,20 @@ COPY package.json package-lock.json ./
 # Clean npm cache and install dependencies with verbose logging
 RUN npm cache clean --force && npm install --legacy-peer-deps --verbose
 
+# Check if npm install was successful
+RUN echo "NPM Install Completed" && ls -l /app/node_modules
+
 # Copy the rest of the application code
 COPY . .
 
+# Add environment variables if needed (uncomment if applicable)
+# ENV NEXT_PUBLIC_API_URL=<your-api-url>
+
 # Build the Next.js app with verbose logging to get more details on any issues
-RUN npm run build --verbose
+RUN echo "Starting Build Process" && npm run build --verbose
+
+# Check if the build process succeeded
+RUN echo "Build Completed" && ls -l /app/.next
 
 # Use a smaller production image for final deployment
 FROM node:20-alpine AS production
