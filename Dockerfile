@@ -1,26 +1,23 @@
-# Use a stable node image
+# Start with a stable node image
 FROM node:18-alpine
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Install Yarn globally
-RUN npm install -g yarn
+# Copy only package.json and package-lock.json initially to utilize Docker cache
+COPY package.json package-lock.json ./
 
-# Copy only package.json to avoid unnecessary re-installation of dependencies
-COPY package.json ./
+# Clean npm cache and install dependencies with verbose logging
+RUN npm cache clean --force && npm install --legacy-peer-deps --verbose
 
-# Install dependencies using yarn (this will also generate yarn.lock file)
-RUN yarn install --frozen-lockfile --verbose
-
-# Copy the rest of your application files
+# Copy the rest of the application files
 COPY . .
 
-# Build the Next.js application
-RUN yarn build
+# Build the application
+RUN npm run build
 
-# Expose the app port (usually 3000 for Next.js)
+# Expose the app's port
 EXPOSE 3000
 
-# Start the Next.js app in production mode
-CMD ["yarn", "start"]
+# Run the app in production mode
+CMD ["npm", "run", "start"]
