@@ -1,26 +1,26 @@
-# Base image with a stable Node.js version
-FROM node:18
+# Step 1: Use a stable Node.js LTS version
+FROM node:18-bullseye-slim
 
-# Set the working directory
+# Step 2: Set the working directory
 WORKDIR /app
 
-# Copy only the package.json and package-lock.json first
+# Step 3: Copy package.json and package-lock.json (or yarn.lock if you are using yarn)
 COPY package.json package-lock.json ./
 
-# Clean npm cache to prevent dependency conflicts
+# Step 4: Clean npm cache to prevent potential issues
 RUN npm cache clean --force
 
-# Install dependencies
+# Step 5: Install dependencies with legacy peer dependencies option
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application source code
+# Step 6: Copy the rest of the application source code
 COPY . .
 
-# Build the application
+# Step 7: Build the application
 RUN npm run build
 
-# Expose the app port
+# Step 8: Expose the application port
 EXPOSE 3000
 
-# Run the application
+# Step 9: Start the application
 CMD ["npm", "start"]
