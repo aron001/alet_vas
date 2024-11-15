@@ -9,13 +9,18 @@ RUN apk add --no-cache \
     bash \
     build-base \
     python3 \
+    g++ \
+    libc-dev \
     && npm install -g npm@latest  # Ensure latest npm version is installed
 
 # Copy package.json and package-lock.json (or yarn.lock if using yarn)
 COPY package.json package-lock.json ./
 
-# Clean npm cache and install dependencies with verbose logging
-RUN npm cache clean --force && npm ci --legacy-peer-deps --verbose
+# Clean npm cache
+RUN npm cache clean --force
+
+# Install dependencies
+RUN npm install --legacy-peer-deps --verbose
 
 # Copy the rest of the application code
 COPY . .
