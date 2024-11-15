@@ -7,13 +7,13 @@ WORKDIR /app
 # Copy package.json and package-lock.json (or yarn.lock if using yarn)
 COPY package.json package-lock.json ./
 
-# Clean npm cache and install dependencies
-RUN npm cache clean --force && npm install --legacy-peer-deps
+# Clean npm cache and install dependencies with verbose logging
+RUN npm cache clean --force && npm install --legacy-peer-deps --verbose
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the Next.js app
+# Build the Next.js app with verbose logging to get more details on any issues
 RUN npm run build --verbose
 
 # Use a smaller production image for final deployment
@@ -25,8 +25,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json (or yarn.lock if using yarn)
 COPY package.json package-lock.json ./
 
-# Install only production dependencies
-RUN npm install --production --legacy-peer-deps
+# Install only production dependencies with verbose logging
+RUN npm install --production --legacy-peer-deps --verbose
 
 # Copy build files from the build stage
 COPY --from=build /app/.next ./.next
