@@ -4,17 +4,18 @@ FROM node:20-alpine
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies that are needed for the build
+# Install system dependencies needed for building native modules
 RUN apk add --no-cache \
     bash \
     build-base \
-    python3
+    python3 \
+    && npm install -g npm@latest  # Ensure latest npm version is installed
 
 # Copy package.json and package-lock.json (or yarn.lock if using yarn)
 COPY package.json package-lock.json ./
 
-# Clean npm cache and install dependencies
-RUN npm cache clean --force && npm install --legacy-peer-deps --verbose
+# Clean npm cache and install dependencies with verbose logging
+RUN npm cache clean --force && npm ci --legacy-peer-deps --verbose
 
 # Copy the rest of the application code
 COPY . .
