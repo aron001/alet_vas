@@ -1,26 +1,26 @@
-# Step 1: Use a stable Node.js LTS version
-FROM node:18-bullseye-slim
+# Use a stable node image
+FROM node:18-alpine
 
-# Step 2: Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Step 3: Copy package.json and package-lock.json (or yarn.lock if you are using yarn)
-COPY package.json package-lock.json ./
+# Install Yarn globally
+RUN npm install -g yarn
 
-# Step 4: Clean npm cache to prevent potential issues
-RUN npm cache clean --force
+# Copy only package.json to avoid unnecessary re-installation of dependencies
+COPY package.json ./
 
-# Step 5: Install dependencies with legacy peer dependencies option
-RUN npm install --legacy-peer-deps
+# Install dependencies using yarn (this will also generate yarn.lock file)
+RUN yarn install --frozen-lockfile --verbose
 
-# Step 6: Copy the rest of the application source code
+# Copy the rest of your application files
 COPY . .
 
-# Step 7: Build the application
-RUN npm run build
+# Build the Next.js application
+RUN yarn build
 
-# Step 8: Expose the application port
+# Expose the app port (usually 3000 for Next.js)
 EXPOSE 3000
 
-# Step 9: Start the application
-CMD ["npm", "start"]
+# Start the Next.js app in production mode
+CMD ["yarn", "start"]
