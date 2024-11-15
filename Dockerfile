@@ -1,5 +1,11 @@
-# Use Node.js 20.x as the base image
 FROM node:20-alpine
+
+# Install build dependencies
+RUN apk add --no-cache \
+  python3 \
+  make \
+  g++ \
+  bash
 
 # Set the working directory inside the container
 WORKDIR /app
