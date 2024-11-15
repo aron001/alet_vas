@@ -1,29 +1,26 @@
-# Use the official Node.js LTS image
-FROM node:18-alpine
+# Use Node.js LTS version (Debian-based for better compatibility)
+FROM node:18-slim
 
-# Install essential build tools and dependencies
-RUN apk add --no-cache python3 make g++ 
-
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy only the package files to install dependencies
+# Install system dependencies
+RUN apt-get update && apt-get install -y python3 build-essential && rm -rf /var/lib/apt/lists/*
+
+# Copy only the package.json and package-lock.json files
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
-# Copy the entire application source code
+# Copy the rest of the application source code
 COPY . .
 
-# Build the Next.js application
+# Build the Next.js app
 RUN npm run build
 
-# Set NODE_ENV to production
-ENV NODE_ENV=production
-
-# Expose the default Next.js port
+# Expose the application port
 EXPOSE 3000
 
-# Start the application
+# Run the application in production mode
 CMD ["npm", "start"]
