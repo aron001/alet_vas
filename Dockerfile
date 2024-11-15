@@ -1,11 +1,5 @@
+# Use Node.js 20.x as the base image
 FROM node:20-alpine
-
-# Install build dependencies
-RUN apk add --no-cache \
-  python3 \
-  make \
-  g++ \
-  bash
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -20,7 +14,7 @@ RUN npm cache clean --force && npm install --legacy-peer-deps
 COPY . .
 
 # Build the Next.js app
-RUN npm run build
+RUN npm run build --verbose
 
 # Expose the port that the app will run on
 EXPOSE 3000
