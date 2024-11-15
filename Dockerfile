@@ -1,14 +1,17 @@
 # Use the official Node.js LTS image
 FROM node:18-alpine
 
-# Set the working directory inside the container
+# Install essential build tools and dependencies
+RUN apk add --no-cache python3 make g++ 
+
+# Set the working directory
 WORKDIR /app
 
 # Copy only the package files to install dependencies
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the entire application source code
 COPY . .
