@@ -1,23 +1,23 @@
-# Start with a stable node image
-FROM node:18-alpine
+# Use Node.js 20.x as the base image
+FROM node:20-alpine
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy only package.json and package-lock.json initially to utilize Docker cache
+# Copy package.json and package-lock.json (or yarn.lock if using yarn)
 COPY package.json package-lock.json ./
 
-# Clean npm cache and install dependencies with verbose logging
-RUN npm cache clean --force && npm install --legacy-peer-deps --verbose
+# Clean npm cache and install dependencies
+RUN npm cache clean --force && npm install --legacy-peer-deps
 
-# Copy the rest of the application files
+# Copy the rest of the application code
 COPY . .
 
-# Build the application
+# Build the Next.js app
 RUN npm run build
 
-# Expose the app's port
+# Expose the port that the app will run on
 EXPOSE 3000
 
-# Run the app in production mode
+# Command to run the Next.js app
 CMD ["npm", "run", "start"]
