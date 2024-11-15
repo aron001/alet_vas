@@ -1,38 +1,20 @@
-# Stage 1: Install Dependencies
-FROM node:18-alpine AS dependencies
-
-# Set working directory
-WORKDIR /app
-
-# Install dependencies
-COPY package.json package-lock.json ./
-RUN npm install --frozen-lockfile
-
-# Stage 2: Build Application
-FROM node:18-alpine AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Copy source code and installed dependencies
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY . .
-
-# Build the application
-RUN npm run build
-
-# Stage 3: Production Image
+# Use the official Node.js LTS image
 FROM node:18-alpine
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy built application and production dependencies
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json .
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/next.config.js ./next.config.js
+# Copy only the package files to install dependencies
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the entire application source code
+COPY . .
+
+# Build the Next.js application
+RUN npm run build
 
 # Set NODE_ENV to production
 ENV NODE_ENV=production
@@ -41,4 +23,4 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]
