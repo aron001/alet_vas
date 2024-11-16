@@ -16,6 +16,24 @@ COPY . .
 # Build the Next.js app with verbose logging
 RUN npm run build --verbose
 
-# For testing purposes, let's just expose the port and run the app
+# Production stage
+FROM node:20-alpine AS production
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy only necessary files from the build stage
+COPY --from=build /app/next.config.js ./
+COPY --from=build /app/package.json ./
+COPY --from=build /app/package-lock.json ./
+COPY --from=build /app/.next ./
+COPY --from=build /app/public ./
+
+# Install only production dependencies
+RUN npm install --production --legacy-peer-deps --verbose
+
+# Expose the port the app runs on
 EXPOSE 3000
+
+# Command to run the application
 CMD ["npm", "run", "start"]
