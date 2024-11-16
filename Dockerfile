@@ -1,29 +1,35 @@
-# Stage 1: Build the Next.js app
+# Use a Node.js image as the base
 FROM node:20-alpine AS builder
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and lock file
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm cache clean --force && npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application code
+# Copy all files
 COPY . .
 
-# Build and export the Next.js app to static files
-RUN npm run build && npm run export
+# Build the app
+RUN npm run build
 
-# Stage 2: Serve the app with Nginx
-FROM nginx:alpine
+# Use a production-ready Node.js image for serving
+FROM node:20-alpine
 
-# Copy the exported static files from the builder stage
-COPY --from=builder /app/out /usr/share/nginx/html
+# Set working directory
+WORKDIR /app
 
-# Expose port 80 for serving the static files
-EXPOSE 80
+# Copy the built app from the builder stage
+COPY --from=builder /app ./
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Install production dependencies only
+RUN npm install --legacy-peer-deps --production
+
+# Expose the app's port
+EXPOSE 3000
+
+# Run the app
+CMD ["npm", "run", "start"]
