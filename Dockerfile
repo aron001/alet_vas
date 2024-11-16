@@ -7,17 +7,14 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install dependencies, including Next.js
-RUN npm install --legacy-peer-deps
+# Clean npm cache and install dependencies
+RUN npm cache clean --force && npm install --legacy-peer-deps
 
 # Copy the rest of the application code
 COPY . .
 
-# Ensure Next.js is installed correctly
-RUN ["/bin/sh", "-c", "npm install next --legacy-peer-deps"]
-
-# Build the Next.js app
-RUN npm run build
+# Build the Next.js app with verbose output for easier debugging
+RUN npm run build --verbose
 
 # Expose the port the app runs on
 EXPOSE 3000
