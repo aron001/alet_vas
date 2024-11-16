@@ -1,35 +1,32 @@
-# Use a Node.js image as the base
-FROM node:20-alpine AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Copy package.json and lock file
-COPY package.json package-lock.json ./
-
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Copy all files
-COPY . .
-
-# Build the app
-RUN npm run build
-
-# Use a production-ready Node.js image for serving
+# Use Node.js 20.x as the base image
 FROM node:20-alpine
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the built app from the builder stage
-COPY --from=builder /app ./
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
 
-# Install production dependencies only
-RUN npm install --legacy-peer-deps --production
+# Clean npm cache
+RUN npm cache clean --force
 
-# Expose the app's port
+# Install Next.js individually
+RUN npm install next@15.0.2 --legacy-peer-deps
+
+# Install React and React DOM individually
+RUN npm install react@19.0.0-rc-02c0e824-20241028 react-dom@19.0.0-rc-02c0e824-20241028 --legacy-peer-deps
+
+# Install other dependencies and devDependencies
+RUN npm install --legacy-peer-deps
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the Next.js app
+RUN npm run build
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Run the app
+# Command to run the application
 CMD ["npm", "run", "start"]
