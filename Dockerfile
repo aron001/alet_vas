@@ -1,5 +1,5 @@
-# Use Node.js 20.x as the base image
-FROM node:20-alpine
+# Stage 1: Build the Next.js app
+FROM node:20-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -7,17 +7,23 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Clean npm cache and install dependencies
+# Install dependencies
 RUN npm cache clean --force && npm install --legacy-peer-deps
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the Next.js app with verbose output for easier debugging
-RUN npm run build --verbose
+# Build and export the Next.js app to static files
+RUN npm run build && npm run export
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Stage 2: Serve the app with Nginx
+FROM nginx:alpine
 
-# Command to run the application
-CMD ["npm", "run", "start"]
+# Copy the exported static files from the builder stage
+COPY --from=builder /app/out /usr/share/nginx/html
+
+# Expose port 80 for serving the static files
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
